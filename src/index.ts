@@ -4,8 +4,8 @@ import { renderUserBlock } from './user.js';
 import { renderToast } from './lib.js';
 
 window.addEventListener('DOMContentLoaded', () => {
-  renderUserBlock('', '', 1);
-  renderSearchFormBlock();
+  renderUserBlock('Ilya Chvanov', '/img/newjawa.jpg', 1);
+  renderSearchFormBlock(null, null);
   renderSearchStubBlock();
   renderToast(
     {
