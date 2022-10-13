@@ -32,6 +32,7 @@ window.addEventListener('DOMContentLoaded', () => {
       },
     }
   );
+  handleSearch();
 });
 
 interface SearchFormData {
@@ -40,28 +41,35 @@ interface SearchFormData {
   maxPrice: number;
 }
 
-export function handleSearch(): SearchFormData {
-  const searchData: SearchFormData = null;
+//interface Place {}
+
+function handleSearch(): SearchFormData {
+  console.log('handleSearch');
+  const searchData: SearchFormData = {
+    checkIn: '',
+    checkOut: '',
+    maxPrice: 0,
+  };
+  
   const form = document.getElementById('searchForm');
+  let formData = null;
 
   if (form instanceof HTMLFormElement) {
     form.addEventListener('submit', (e) => {
       e.preventDefault();
-      const formData = new FormData(form);
-      searchData.checkIn = '' + formData.get('checkin');
-      searchData.checkOut = '' + formData.get('checkout');
-      searchData.maxPrice = +formData.get('price');
+      formData = new FormData(form);
+      searchData.checkIn = formData.get('checkin');
+      searchData.checkOut = formData.get('checkout');
+      searchData.maxPrice = formData.get('price');
+      search(searchData);
+      return searchData;
     });
   }
-  return searchData;
+  return null;
 }
 
-interface Place {
-  data: [];
+function search(searchData: SearchFormData) {
+  if (searchData != null) {
+    console.log(searchData);
+  }
 }
-
-export function search(searchData: SearchFormData) {
-  console.log(searchData);
-}
-
-search(handleSearch());
