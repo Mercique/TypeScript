@@ -27,3 +27,13 @@ export function renderToast(message, action) {
     };
   }
 }
+
+export function getUserData(key: unknown): string {
+  if (typeof key == 'string') return localStorage.getItem(key);
+  return null;
+}
+
+export function getFavoritesAmount(key: unknown): string {
+  if (typeof key == 'string') return localStorage.getItem(key);
+  return null;
+}

@@ -1,10 +1,23 @@
 import { renderSearchFormBlock } from './search-form.js';
 import { renderSearchStubBlock } from './search-results.js';
 import { renderUserBlock } from './user.js';
-import { renderToast } from './lib.js';
+import { renderToast, getUserData, getFavoritesAmount } from './lib.js';
+
+localStorage.setItem(
+  'user',
+  JSON.stringify({
+    username: 'Chvanov Ilya',
+    avatarUrl: '../img/newjawa.jpg',
+  })
+);
+
+localStorage.setItem('favoritesAmount', '11');
+
+const { username, avatarUrl } = JSON.parse(getUserData('user'));
+const favoritesAmount: number = +getFavoritesAmount('favoritesAmount');
 
 window.addEventListener('DOMContentLoaded', () => {
-  renderUserBlock('Ilya Chvanov', '/img/newjawa.jpg', 1);
+  renderUserBlock(username, avatarUrl, favoritesAmount);
   renderSearchFormBlock(null, null);
   renderSearchStubBlock();
   renderToast(
@@ -20,3 +33,35 @@ window.addEventListener('DOMContentLoaded', () => {
     }
   );
 });
+
+interface SearchFormData {
+  checkIn: string;
+  checkOut: string;
+  maxPrice: number;
+}
+
+export function handleSearch(): SearchFormData {
+  const searchData: SearchFormData = null;
+  const form = document.getElementById('searchForm');
+
+  if (form instanceof HTMLFormElement) {
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      searchData.checkIn = '' + formData.get('checkin');
+      searchData.checkOut = '' + formData.get('checkout');
+      searchData.maxPrice = +formData.get('price');
+    });
+  }
+  return searchData;
+}
+
+interface Place {
+  data: [];
+}
+
+export function search(searchData: SearchFormData) {
+  console.log(searchData);
+}
+
+search(handleSearch());

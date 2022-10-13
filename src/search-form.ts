@@ -15,7 +15,7 @@ export function renderSearchFormBlock(checkin: string | null, checkout: string |
   renderBlock(
     'search-form-block',
     `
-    <form>
+    <form id="searchForm">
       <fieldset class="search-filedset">
         <div class="row">
           <div>
@@ -42,8 +42,9 @@ export function renderSearchFormBlock(checkin: string | null, checkout: string |
             <input id="max-price" type="text" value="" name="price" class="max-price" />
           </div>
           <div>
-            <div><button>Найти</button></div>
+            <div><button type="submit">Найти</button></div>
           </div>
+          <div id="display"></div>
         </div>
       </fieldset>
     </form>

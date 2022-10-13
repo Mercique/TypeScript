@@ -16,7 +16,7 @@ export function renderUserBlock(
     <div class="header-container">
       <img class="avatar" src=${
   userIconUrl ? userIconUrl : '/img/avatar.png'
-} alt="Wade Warren" />
+} alt="user avatar" />
       <div class="info">
           <p class="name">${userName ? userName : 'Wade Warren'}</p>
           <p class="fav">
