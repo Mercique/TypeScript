@@ -42,7 +42,7 @@ export function renderSearchFormBlock(checkin: string | null, checkout: string |
             <input id="max-price" type="text" value="" name="price" class="max-price" />
           </div>
           <div>
-            <div><button type="submit">Найти</button></div>
+            <div><button type="submit" id="btn">Найти</button></div>
           </div>
           <div id="display"></div>
         </div>

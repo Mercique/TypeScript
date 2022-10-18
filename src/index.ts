@@ -1,7 +1,17 @@
 import { renderSearchFormBlock } from './search-form.js';
-import { renderSearchStubBlock } from './search-results.js';
+import {
+  renderSearchStubBlock,
+  renderSearchResultsBlock,
+  renderHotel,
+} from './search-results.js';
 import { renderUserBlock } from './user.js';
-import { renderToast, getUserData, getFavoritesAmount } from './lib.js';
+import {
+  renderToast,
+  getUserData,
+  getFavoritesAmount,
+  Place,
+  SearchFormData,
+} from './lib.js';
 
 localStorage.setItem(
   'user',
@@ -14,34 +24,26 @@ localStorage.setItem(
 localStorage.setItem('favoritesAmount', '11');
 
 const { username, avatarUrl } = JSON.parse(getUserData('user'));
-const favoritesAmount: number = +getFavoritesAmount('favoritesAmount');
 
 window.addEventListener('DOMContentLoaded', () => {
+  const favoritesAmount: number = +getFavoritesAmount('favoritesAmount');
   renderUserBlock(username, avatarUrl, favoritesAmount);
   renderSearchFormBlock(null, null);
   renderSearchStubBlock();
-  renderToast(
-    {
-      text: 'Это пример уведомления. Используйте его при необходимости',
-      type: 'success',
-    },
-    {
-      name: 'Понял',
-      handler: () => {
-        console.log('Уведомление закрыто');
-      },
-    }
-  );
+  // renderToast(
+  //   {
+  //     text: 'Это пример уведомления. Используйте его при необходимости',
+  //     type: 'success',
+  //   },
+  //   {
+  //     name: 'Понял',
+  //     handler: () => {
+  //       console.log('Уведомление закрыто');
+  //     },
+  //   }
+  // );
   handleSearch();
 });
-
-interface SearchFormData {
-  checkIn: string;
-  checkOut: string;
-  maxPrice: number;
-}
-
-//interface Place {}
 
 function handleSearch(): SearchFormData {
   console.log('handleSearch');
@@ -50,7 +52,6 @@ function handleSearch(): SearchFormData {
     checkOut: '',
     maxPrice: 0,
   };
-  
   const form = document.getElementById('searchForm');
   let formData = null;
 
@@ -71,5 +72,61 @@ function handleSearch(): SearchFormData {
 function search(searchData: SearchFormData) {
   if (searchData != null) {
     console.log(searchData);
+    fetch('http://localhost:3000/places')
+      .then<Place>((res) => res.json())
+      .then((hotels) => {
+        document.getElementById('search-results-block').innerHTML = '';
+        const getHotels = Object.values(hotels);
+        
+        const filteredHotels = getHotels.filter((hotel) => {
+          if (searchData.maxPrice) {
+            return (
+              hotel.price < searchData.maxPrice &&
+              !hotel.bookedDates.includes(searchData.checkIn) &&
+              !hotel.bookedDates.includes(searchData.checkOut)
+            );
+          } else
+            return (
+              !hotel.bookedDates.includes(searchData.checkIn) &&
+              !hotel.bookedDates.includes(searchData.checkOut)
+            );
+        });
+        filteredHotels.forEach((hotel: Place) => {
+          renderHotel(hotel);
+        });
+        
+        toggleFavoriteItem();
+      });
   }
+}
+
+function toggleFavoriteItem() {
+  document.querySelectorAll('.favorites').forEach((item) =>
+    item.addEventListener('click', () => {
+      const hotel = {
+        id: item.getAttribute('hotel_id'),
+        name: item.getAttribute('hotel_name'),
+        image: item.getAttribute('hotel_img'),
+      };
+
+      let items: object = JSON.parse(localStorage.getItem('favoriteItems'));
+
+      if (items) {
+        if (Object.prototype.hasOwnProperty.call(items, hotel.id)) {
+          delete items[`${hotel.id}`];
+          item.classList.remove('active');
+        } else {
+          items[`${hotel.id}`] = hotel;
+          item.classList.add('active');
+        }
+      } else {
+        items = {};
+        items[`${hotel.id}`] = hotel;
+        item.classList.add('active');
+      }
+      localStorage.setItem('favoriteItems', JSON.stringify(items));
+      const favoritesAmount: number = +getFavoritesAmount('favoriteItems');
+      renderUserBlock(username, avatarUrl, favoritesAmount);
+    })
+  );
 }

@@ -4,6 +4,9 @@ body {
 	background: #F2F2F2;
 	font-family: 'Lato', sans-serif;
 }
+li {
+    list-style-type: none;
+}
 .main-container {
 	background: #fff;
 	width: 980px;
