@@ -63,7 +63,36 @@ function handleSearch(): SearchFormData {
       searchData.checkOut = formData.get('checkout');
       searchData.maxPrice = formData.get('price');
       search(searchData);
-      return searchData;
+
+      // const getHotels = (hotels: []) => hotels;
+
+      // try {
+      //   renderToast(
+      //     {
+      //       text: `${hotels.length} hotel(s) found!`,
+      //       type: 'success',
+      //     },
+      //     {
+      //       name: 'dismiss',
+      //       handler: () => {
+      //         console.log('Уведомление закрыто');
+      //       },
+      //     }
+      //   );
+      // } catch (e) {
+      //   renderToast(
+      //     {
+      //       text: e,
+      //       type: 'error',
+      //     },
+      //     {
+      //       name: 'Закрыть',
+      //       handler: () => {
+      //         console.log('Уведомление закрыто');
+      //       },
+      //     }
+      //   );
+      // }
     });
   }
   return null;

@@ -3,9 +3,11 @@
     "outDir": "public/scripts",
     "target": "es2017",
     "module": "es2015",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "allowJs": true
   },
   "files": [
     "src/index.ts"
-  ]
+  ],
+  "lib": ["ES5", "ES2015", "DOM"]
 }

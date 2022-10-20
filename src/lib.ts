@@ -24,7 +24,7 @@ export function addBlock(elementId, html) {
   element.insertAdjacentHTML('beforeend', html);
 }
 
-export function renderToast(message, action) {
+export function renderToast(message, action?) {
   let messageText = '';
 
   if (message != null) {
@@ -44,7 +44,7 @@ export function renderToast(message, action) {
       if (action != null && action.handler != null) {
         action.handler();
       }
-      renderToast(null, '');
+      renderToast(null);
     };
   }
 }
