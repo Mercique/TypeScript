@@ -4,7 +4,18 @@
     "target": "es2017",
     "module": "es2015",
     "moduleResolution": "node",
-    "allowJs": true
+    "allowJs": true,
+    "alwaysStrict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "strictBindCallApply": true,
+    "noImplicitThis": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true
   },
   "include": ["src/**/*"],
   "lib": ["ES5", "ES2015", "DOM"]

@@ -1,8 +1,8 @@
 import { renderBlock } from './lib.js';
 
-export function renderUserBlock(favoriteItemsAmount: number) {
+export function renderUserBlock(favoriteItemsAmount: number | null) {
   const bool = Boolean(favoriteItemsAmount);
-  const items: string | number = bool ? favoriteItemsAmount : 'ничего нет';
+  const items: string | number | null = bool ? favoriteItemsAmount : 'ничего нет';
 
   renderBlock(
     'user-block',
