@@ -1,5 +1,4 @@
-import { renderBlock, addBlock } from './lib.js';
-import { Place } from './lib.js';
+import { addBlock, renderBlock } from './lib.js';
 
 export function renderSearchStubBlock() {
   renderBlock(
@@ -25,23 +24,72 @@ export function renderEmptyOrErrorSearchBlock(reasonMessage) {
   );
 }
 
-export function renderSearchResultsBlock() {
+export function renderSearchResultsBlock(hotels) {
   renderBlock(
     'search-results-block',
     `
     <div class="search-results-header">
         <p>Результаты поиска</p>
-        <div class="search-results-filter">
+        <form class="search-results-filter">
             <span><i class="icon icon-filter"></i> Сортировать:</span>
-            <select>
-                <option selected="">Сначала дешёвые</option>
-                <option selected="">Сначала дорогие</option>
-                <option>Сначала ближе</option>
+            <select id="select" name="select">
+                <option value="cheap">Сначала дешёвые</option>
+                <option value="expensive">Сначала дорогие</option>
+                <!---<option name="near">Сначала ближе</option>--->
             </select>
-        </div>
+        </form>
     </div>
     <ul class="results-list" id="results-list">
-      <li class="result">
+    </ul>
+    `
+  );
+  hotels.length == 0
+    ? renderEmptyOrErrorSearchBlock('nothing found')
+    : renderHotels(hotels);
+}
+
+function renderHotels(hotels) {
+  for (let index = 0; index < hotels.length; index++) {
+    const { title, details, photos, totalPrice } = hotels[index];
+    renderHotel(title, details, photos[0], totalPrice);
+  }
+}
+
+function renderHotel(
+  title: string,
+  details: string,
+  imgName: string,
+  price: number
+) {
+  addBlock(
+    'results-list',
+    `
+  <li class="result" style="list-style-type:none;">
+        <div class="result-container">
+          <div class="result-img-container">
+            <div class="favorites"></div>
+            <img class="result-img" src="./img/${imgName}" alt="${imgName}">
+          </div>	
+          <div class="result-info">
+            <div class="result-info--header">
+              <p>${title}</p>
+              <p class="price">${price}&#8381;</p>
+            </div>
+            <div class="result-info--map"><i class="map-icon"></i> 1.1км от вас</div>
+            <div class="result-info--descr">${details}</div>
+            <div class="result-info--footer">
+              <div>
+                <button>Забронировать</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </li>
+  `
+  );
+}
+
+`<li class="result">
         <div class="result-container">
           <div class="result-img-container">
             <div class="favorites active"></div>
@@ -82,44 +130,4 @@ export function renderSearchResultsBlock() {
             </div>
           </div>
         </div>
-      </li>
-    </ul>
-    `
-  );
-}
-
-export function renderHotel(hotel: Place) {
-  const items = JSON.parse(localStorage.getItem('favoriteItems'));
-
-  addBlock(
-    'search-results-block',
-    `<li class="result" hotel_id="${hotel.id}">
-        <div class="result-container">
-          <div class="result-img-container">
-            <div class="favorites ${
-  hotel.id in items ? 'active' : ''
-} }" hotel_id="${hotel.id}" hotel_name="${hotel.name}" hotel_img="${
-  hotel.image
-}"></div>
-            <img class="result-img" src="${hotel.image}" alt="${hotel.name}">
-          </div>	
-          <div class="result-info">
-            <div class="result-info--header">
-              <p>${hotel.name}</p>
-              <p class="price">${hotel.price}&#8381;</p>
-            </div>
-            <div class="result-info--map"><i class="map-icon"></i>${
-  hotel.remoteness
-}км от вас</div>
-            <div class="result-info--descr">${hotel.description}</div>
-            <div class="result-info--footer">
-              <div>
-                <button>Забронировать</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </li>
-      `
-  );
-}
+      </li>`;

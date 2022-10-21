@@ -1,19 +1,3 @@
-export interface Place {
-  id: number;
-  name: string;
-  price: number;
-  description: string;
-  remoteness: number;
-  bookedDates: string[];
-  image: string;
-}
-
-export interface SearchFormData {
-  checkIn: string;
-  checkOut: string;
-  maxPrice: number;
-}
-
 export function renderBlock(elementId, html) {
   const element = document.getElementById(elementId);
   element.innerHTML = html;
@@ -47,14 +31,4 @@ export function renderToast(message, action?) {
       renderToast(null);
     };
   }
-}
-
-export function getUserData(key: unknown): string {
-  if (typeof key == 'string') return localStorage.getItem(key);
-  return null;
-}
-
-export function getFavoritesAmount(key: string): number {
-  const items = JSON.parse(localStorage.getItem(key));
-  return Object.keys(items).length;
 }

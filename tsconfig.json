@@ -6,8 +6,6 @@
     "moduleResolution": "node",
     "allowJs": true
   },
-  "files": [
-    "src/index.ts"
-  ],
+  "include": ["src/**/*"],
   "lib": ["ES5", "ES2015", "DOM"]
 }

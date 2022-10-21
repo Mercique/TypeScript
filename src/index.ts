@@ -1,161 +1,116 @@
 import { renderSearchFormBlock } from './search-form.js';
-import {
-  renderSearchStubBlock,
-  renderSearchResultsBlock,
-  renderHotel,
-} from './search-results.js';
+import { renderSearchStubBlock } from './search-results.js';
 import { renderUserBlock } from './user.js';
-import {
-  renderToast,
-  getUserData,
-  getFavoritesAmount,
-  Place,
-  SearchFormData,
-} from './lib.js';
+import { renderToast } from './lib.js';
+// import { FlatRentSdk } from "./flat-rent-sdk.js";
+import { FlatRentSdk } from './providers/flat-rent-sdk/flat-rent-sdk.js';
 
-localStorage.setItem(
-  'user',
-  JSON.stringify({
-    username: 'Chvanov Ilya',
-    avatarUrl: '../img/newjawa.jpg',
-  })
+// import { Homy } from "./homy.js";
+import { Homy } from './providers/homy/homy.js';
+import { renderSearchResultsBlock } from './search-results.js';
+import { Hotel } from './hotel.js';
+import { DatesHelper } from './datesHelper.js';
+
+const flatSdk: FlatRentSdk = new FlatRentSdk();
+const homySdk: Homy = new Homy();
+const today = new Date();
+const checkin = today;
+const checkout = DatesHelper.addDays(DatesHelper.cloneDate(today), 2);
+let hotels = [];
+
+const sortByPriceAscending = (one: Hotel, two: Hotel) => one.totalPrice - two.totalPrice;
+
+const sortByPriceDescending = (one: Hotel, two: Hotel) => two.totalPrice - one.totalPrice;
+
+renderUserBlock(10);
+renderSearchFormBlock(
+  checkin.toISOString().split('T')[0],
+  checkout.toISOString().split('T')[0]
 );
+renderSearchStubBlock();
 
-localStorage.setItem('favoritesAmount', '11');
+const form = document.getElementById('searchForm');
 
-const { username, avatarUrl } = JSON.parse(getUserData('user'));
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(form as HTMLFormElement);
+  const price = formData.get('price');
+  const checkin = formData.get('checkin');
+  const checkout = formData.get('checkout');
+  const homy = formData.get('homy');
+  const flatRent = formData.get('flat-rent');
 
-window.addEventListener('DOMContentLoaded', () => {
-  const favoritesAmount: number = +getFavoritesAmount('favoritesAmount');
-  renderUserBlock(username, avatarUrl, favoritesAmount);
-  renderSearchFormBlock(null, null);
-  renderSearchStubBlock();
-  // renderToast(
-  //   {
-  //     text: 'Это пример уведомления. Используйте его при необходимости',
-  //     type: 'success',
-  //   },
-  //   {
-  //     name: 'Понял',
-  //     handler: () => {
-  //       console.log('Уведомление закрыто');
-  //     },
-  //   }
-  // );
-  handleSearch();
-});
+  console.log('form submitted: price, checkin, checkout, homy, flatRent', {
+    price,
+    checkin,
+    checkout,
+    homy,
+    flatRent,
+  });
 
-function handleSearch(): SearchFormData {
-  console.log('handleSearch');
-  const searchData: SearchFormData = {
-    checkIn: '',
-    checkOut: '',
-    maxPrice: 0,
+  const searchQuery = {
+    city: 'Санкт-Петербург',
+    checkInDate: new Date(checkin as string),
+    checkOutDate: new Date(checkout as string),
+    priceLimit: price,
   };
-  const form = document.getElementById('searchForm');
-  let formData = null;
 
-  if (form instanceof HTMLFormElement) {
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      formData = new FormData(form);
-      searchData.checkIn = formData.get('checkin');
-      searchData.checkOut = formData.get('checkout');
-      searchData.maxPrice = formData.get('price');
-      search(searchData);
+  try {
+    if (homy && !flatRent) {
+      hotels = await homySdk.search(searchQuery);
+    }
 
-      // const getHotels = (hotels: []) => hotels;
+    if (flatRent && !homy) {
+      hotels = await flatSdk.search(searchQuery);
+    }
 
-      // try {
-      //   renderToast(
-      //     {
-      //       text: `${hotels.length} hotel(s) found!`,
-      //       type: 'success',
-      //     },
-      //     {
-      //       name: 'dismiss',
-      //       handler: () => {
-      //         console.log('Уведомление закрыто');
-      //       },
-      //     }
-      //   );
-      // } catch (e) {
-      //   renderToast(
-      //     {
-      //       text: e,
-      //       type: 'error',
-      //     },
-      //     {
-      //       name: 'Закрыть',
-      //       handler: () => {
-      //         console.log('Уведомление закрыто');
-      //       },
-      //     }
-      //   );
-      // }
-    });
-  }
-  return null;
-}
+    if (homy && flatRent) {
+      const hotelsHomy = await homySdk.search(searchQuery);
+      const hotelsFlatRent = await flatSdk.search(searchQuery);
+      hotels = [...hotelsHomy, ...hotelsFlatRent];
+    }
 
-function search(searchData: SearchFormData) {
-  if (searchData != null) {
-    console.log(searchData);
-    fetch('http://localhost:3000/places')
-      .then<Place>((res) => res.json())
-      .then((hotels) => {
-        document.getElementById('search-results-block').innerHTML = '';
-        const getHotels = Object.values(hotels);
-        
-        const filteredHotels = getHotels.filter((hotel) => {
-          if (searchData.maxPrice) {
-            return (
-              hotel.price < searchData.maxPrice &&
-              !hotel.bookedDates.includes(searchData.checkIn) &&
-              !hotel.bookedDates.includes(searchData.checkOut)
-            );
-          } else
-            return (
-              !hotel.bookedDates.includes(searchData.checkIn) &&
-              !hotel.bookedDates.includes(searchData.checkOut)
-            );
-        });
-        filteredHotels.forEach((hotel: Place) => {
-          renderHotel(hotel);
-        });
-        
-        toggleFavoriteItem();
-      });
-  }
-}
-
-function toggleFavoriteItem() {
-  document.querySelectorAll('.favorites').forEach((item) =>
-    item.addEventListener('click', () => {
-      const hotel = {
-        id: item.getAttribute('hotel_id'),
-        name: item.getAttribute('hotel_name'),
-        image: item.getAttribute('hotel_img'),
-      };
-
-      let items: object = JSON.parse(localStorage.getItem('favoriteItems'));
-
-      if (items) {
-        if (Object.prototype.hasOwnProperty.call(items, hotel.id)) {
-          delete items[`${hotel.id}`];
-          item.classList.remove('active');
-        } else {
-          items[`${hotel.id}`] = hotel;
-          item.classList.add('active');
-        }
-      } else {
-        items = {};
-        items[`${hotel.id}`] = hotel;
-        item.classList.add('active');
+    hotels.sort(sortByPriceAscending);
+    renderSearchResultsBlock(hotels);
+    renderToast(
+      {
+        text: `${hotels.length} hotel(s) found!`,
+        type: 'success',
+      },
+      {
+        name: 'dismiss',
+        handler: () => {
+          console.log('Уведомление закрыто');
+        },
       }
-      localStorage.setItem('favoriteItems', JSON.stringify(items));
-      const favoritesAmount: number = +getFavoritesAmount('favoriteItems');
-      renderUserBlock(username, avatarUrl, favoritesAmount);
-    })
-  );
-}
+    );
+
+    const select = document.getElementById('select');
+    console.log(select);
+    select.addEventListener('change', (e) => {
+      console.log('select changed');
+      if (e.target instanceof HTMLSelectElement) {
+        console.log(e.target.value);
+        if (e.target.value === 'cheap') {
+          hotels.sort(sortByPriceAscending);
+        } else {
+          hotels.sort(sortByPriceDescending);
+        }
+        return renderSearchResultsBlock(hotels);
+      }
+    });
+  } catch (e) {
+    renderToast(
+      {
+        text: e,
+        type: 'error',
+      },
+      {
+        name: 'Закрыть',
+        handler: () => {
+          console.log('Уведомление закрыто');
+        },
+      }
+    );
+  }
+});
